@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Almoxarifado Santa Rita Madeiras | Controle de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #f0f4f0;
+            padding: 2rem 1.5rem;
+            color: #1e2a1f;
+        }
+
+        /* Container principal */
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Cabeçalho com identidade visual */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.2rem 2rem;
+            border-radius: 32px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            border-left: 8px solid #2b6e3c;
+        }
+
+        .title-section h1 {
+            font-size: 1.8rem;
+            color: #1f4f2d;
+            letter-spacing: -0.3px;
+        }
+
+        .title-section p {
+            color: #5b6e5a;
+            font-weight: 500;
+            margin-top: 6px;
+            font-size: 0.9rem;
+        }
+
+        .badge-estoque {
+            background: #e9f5eb;
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-weight: 600;
+            color: #1f6e3a;
+            font-size: 0.9rem;
+            box-shadow: inset 0 0 0 1px #c0dfc6;
+        }
+
+        /* cards de resumo */
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin-bottom: 2.2rem;
+        }
+
+        .stat-card {
+            background: white;
+            flex: 1 1 180px;
+            padding: 1rem 1.2rem;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid #dfeade;
+            transition: 0.2s;
+        }
+
+        .stat-card h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #5e7a5c;
+            margin-bottom: 8px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #2b6e3c;
+        }
+
+        /* Formulário de adicionar / edição */
+        .form-panel {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2ecd9;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1 1 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #416b3a;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input, .input-group select {
+            padding: 10px 12px;
+            border: 1.5px solid #d2e0ce;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            background: #fefef7;
+            transition: 0.2s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #2b6e3c;
+            box-shadow: 0 0 0 3px rgba(43, 110, 60, 0.2);
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #eef3ec;
+            color: #2a5532;
+        }
+
+        .btn-primary {
+            background: #2b6e3c;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary:hover {
+            background: #1f562e;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            border: 1px solid #2b6e3c;
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: #eef5ea;
+        }
+
+        .btn-danger {
+            background: #f8e1e1;
+            color: #b13e3e;
+        }
+        .btn-danger:hover {
+            background: #f3d4d4;
+        }
+
+        /* Tabela / estoque responsivo */
+        .stock-section {
+            background: white;
+            border-radius: 28px;
+            overflow-x: auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e4eddf;
+        }
+
+        .stock-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .stock-table th {
+            text-align: left;
+            padding: 1rem 1rem;
+            background: #f8fbf6;
+            color: #2a5532;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #d8e8d2;
+        }
+
+        .stock-table td {
+            padding: 1rem 1rem;
+            border-bottom: 1px solid #e9f0e5;
+            vertical-align: middle;
+            font-weight: 500;
+            color: #1f331d;
+        }
+
+        .item-categoria {
+            background: #eef4ea;
+            border-radius: 50px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            color: #2c673a;
+        }
+
+        .quantidade-badge {
+            font-weight: 700;
+            background: #f3f9ef;
+            padding: 4px 10px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+
+        .acoes-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            border-radius: 30px;
+        }
+
+        .btn-add-qtd {
+            background: #deedd9;
+            color: #256f3a;
+        }
+
+        .btn-sub-qtd {
+            background: #fff0e0;
+            color: #b45f2b;
+        }
+
+        .btn-delete {
+            background: #fbeaea;
+            color: #bc4e4e;
+        }
+
+        /* mensagem flutuante */
+        .toast-msg {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #1e2a1f;
+            color: #ecf7e6;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .empty-row td {
+            text-align: center;
+            padding: 2rem;
+            color: #8aa882;
+            font-style: italic;
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #7e917b;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 1rem;
+            }
+            .form-panel {
+                padding: 1.2rem;
+            }
+            .header {
+                flex-direction: column;
+                align-items: start;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <div class="header">
+        <div class="title-section">
+            <h1>🪵 Almoxarifado Santa Rita Madeiras</h1>
+            <p>Controle de EPIs, ferramentas e uniformes | Gestão de estoque</p>
+        </div>
+        <div class="badge-estoque">
+            📦 Sistema integrado | versão 2.0
+        </div>
+    </div>
+
+    <!-- cards estatísticos dinâmicos -->
+    <div class="stats" id="statsContainer">
+        <div class="stat-card"><h3>Itens únicos</h3><div class="stat-number" id="totalItens">0</div></div>
+        <div class="stat-card"><h3>Quantidade total</h3><div class="stat-number" id="totalQuantidade">0</div></div>
+        <div class="stat-card"><h3>Categorias</h3><div class="stat-number" id="totalCategorias">0</div></div>
+        <div class="stat-card"><h3>Baixo estoque</h3><div class="stat-number" id="baixoEstoqueCount">0</div></div>
+    </div>
+
+    <!-- formulário para adicionar novo item ou atualizar -->
+    <div class="form-panel">
+        <div class="form-row">
+            <div class="input-group">
+                <label>🏷️ Nome do item</label>
+                <input type="text" id="itemNome" placeholder="Ex: Camisa manga longa, Bota de segurança..." autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>📦 Categoria</label>
+                <select id="itemCategoria">
+                    <option value="Vestuário">Vestuário</option>
+                    <option value="Calçados">Calçados</option>
+                    <option value="Proteção">Proteção</option>
+                    <option value="Ferramentas">Ferramentas</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>🔢 Quantidade</label>
+                <input type="number" id="itemQuantidade" value="1" min="0" step="1">
+            </div>
+            <div class="input-group">
+                <label>⚠️ Estoque mínimo</label>
+                <input type="number" id="itemMinimo" value="5" min="0" step="1">
+            </div>
+            <div class="input-group">
+                <button class="btn btn-primary" id="btnAdicionar">➕ Adicionar / Atualizar</button>
+                <button class="btn btn-outline" id="btnLimparForm">Limpar campos</button>
+            </div>
+        </div>
+        <div style="font-size: 0.7rem; margin-top: 10px; color:#6d8968;">
+            💡 Dica: Se o nome já existir, o sistema irá somar a quantidade. Utilize para dar entrada.
+        </div>
+    </div>
+
+    <!-- tabela de estoque -->
+    <div class="stock-section">
+        <table class="stock-table" id="estoqueTable">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Categoria</th>
+                    <th>Quantidade</th>
+                    <th>Mínimo</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="estoqueBody">
+                <tr class="empty-row"><td colspan="6">Carregando estoque...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <footer>
+        Santa Rita Madeiras • Controle inteligente de almoxarifado • Entradas, saídas e ajustes
+    </footer>
+</div>
+
+<script>
+    // ---------- DADOS INICIAIS (exemplo realista) ----------
+    let estoque = [
+        { id: "1", nome: "Camisa de manga longa", categoria: "Vestuário", quantidade: 24, minimo: 8 },
+        { id: "2", nome: "Bota de segurança", categoria: "Calçados", quantidade: 15, minimo: 6 },
+        { id: "3", nome: "Luva de raspa", categoria: "Proteção", quantidade: 32, minimo: 10 },
+        { id: "4", nome: "Óculos de proteção", categoria: "Proteção", quantidade: 18, minimo: 8 },
+        { id: "5", nome: "Capacete de segurança", categoria: "Proteção", quantidade: 12, minimo: 5 },
+        { id: "6", nome: "Avental de couro", categoria: "Vestuário", quantidade: 7, minimo: 4 },
+        { id: "7", nome: "Serra circular", categoria: "Ferramentas", quantidade: 3, minimo: 2 },
+        { id: "8", nome: "Protetor auricular", categoria: "Proteção", quantidade: 22, minimo: 8 }
+    ];
+
+    // Helper para gerar ID simples (timestamp + random)
+    function gerarId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+
+    // Função para salvar no localStorage (persistência)
+    function salvarEstoque() {
+        localStorage.setItem("santaRitaEstoque", JSON.stringify(estoque));
+    }
+
+    function carregarEstoquePersistido() {
+        const dados = localStorage.getItem("santaRitaEstoque");
+        if (dados) {
+            try {
+                const parsed = JSON.parse(dados);
+                if (Array.isArray(parsed) && parsed.length) {
+                    estoque = parsed;
+                } else if (Array.isArray(parsed)) {
+                    estoque = parsed;
+                }
+            } catch(e) { console.warn("erro ao carregar", e); }
+        }
+        // garantia de que todos tenham campo 'minimo' e id, categoria
+        estoque = estoque.map(item => {
+            return {
+                id: item.id || gerarId(),
+                nome: item.nome,
+                categoria: item.categoria || "Outros",
+                quantidade: typeof item.quantidade === "number" ? item.quantidade : 0,
+                minimo: typeof item.minimo === "number" ? item.minimo : (item.minimo || 5)
+            };
+        });
+        if(estoque.length === 0) {
+            // fallback dados iniciais caso esteja vazio após migração
+            estoque = [
+                { id: gerarId(), nome: "Camisa de manga longa", categoria: "Vestuário", quantidade: 24, minimo: 8 },
+                { id: gerarId(), nome: "Bota de segurança", categoria: "Calçados", quantidade: 15, minimo: 6 },
+                { id: gerarId(), nome: "Luva de raspa", categoria: "Proteção", quantidade: 32, minimo: 10 }
+            ];
+        }
+        salvarEstoque();
+    }
+
+    // Atualizar tabela + estatísticas
+    let editandoId = null; // controle opcional para edição rápida, mas usaremos fluxo de adicionar/somar
+
+    function atualizarTabela() {
+        const tbody = document.getElementById("estoqueBody");
+        if (!tbody) return;
+
+        if (estoque.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="6">📭 Nenhum item cadastrado. Adicione ao estoque acima.</td></tr>';
+            atualizarStats();
+            return;
+        }
+
+        let html = "";
+        for (let item of estoque) {
+            const statusClass = item.quantidade <= item.minimo ? "⚠️ Baixo estoque" : (item.quantidade === 0 ? "❌ Esgotado" : "✅ OK");
+            let statusColorStyle = "";
+            if (item.quantidade <= item.minimo) statusColorStyle = "color:#c95a0c; background:#fff0e4;";
+            else if (item.quantidade === 0) statusColorStyle = "color:#b53b3b; background:#ffe8e8;";
+            else statusColorStyle = "color:#2c7840; background:#e9f5e9;";
+
+            html += `
+                <tr data-id="${item.id}">
+                    <td><strong>${escapeHtml(item.nome)}</strong></td>
+                    <td><span class="item-categoria">${escapeHtml(item.categoria)}</span></td>
+                    <td><span class="quantidade-badge">${item.quantidade} un</span></td>
+                    <td>${item.minimo} un</td>
+                    <td><span style="padding:4px 10px; border-radius:30px; font-size:0.7rem; font-weight:600; ${statusColorStyle}">${statusClass}</span></td>
+                    <td class="acoes-buttons">
+                        <button class="btn btn-sm btn-add-qtd" data-action="add" data-id="${item.id}">➕ +1</button>
+                        <button class="btn btn-sm btn-sub-qtd" data-action="sub" data-id="${item.id}">➖ -1</button>
+                        <button class="btn btn-sm btn-outline" data-action="edit" data-id="${item.id}">✏️ Editar</button>
+                        <button class="btn btn-sm btn-delete" data-action="delete" data-id="${item.id}">🗑️ Excluir</button>
+                    </td>
+                </tr>
+            `;
+        }
+        tbody.innerHTML = html;
+        atualizarStats();
+        salvarEstoque();
+    }
+
+    // pequeno helper para evitar XSS
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // estatísticas
+    function atualizarStats() {
+        const totalItens = estoque.length;
+        const totalQuantidade = estoque.reduce((acc, i) => acc + (i.quantidade || 0), 0);
+        const categoriasUnicas = new Set(estoque.map(i => i.categoria)).size;
+        const baixoEstoque = estoque.filter(i => i.quantidade <= i.minimo).length;
+        document.getElementById("totalItens").innerText = totalItens;
+        document.getElementById("totalQuantidade").innerText = totalQuantidade;
+        document.getElementById("totalCategorias").innerText = categoriasUnicas;
+        document.getElementById("baixoEstoqueCount").innerText = baixoEstoque;
+    }
+
+    // adicionar ou atualizar (se nome existir, soma a quantidade, caso contrário novo)
+    function adicionarOuAtualizarItem() {
+        const nomeInput = document.getElementById("itemNome");
+        const categoriaSelect = document.getElementById("itemCategoria");
+        const quantidadeInput = document.getElementById("itemQuantidade");
+        const minimoInput = document.getElementById("itemMinimo");
+
+        let nome = nomeInput.value.trim();
+        if (nome === "") {
+            mostrarMensagem("❌ Por favor, informe o nome do item.", "erro");
+            return;
+        }
+
+        let quantidade = parseInt(quantidadeInput.value);
+        if (isNaN(quantidade) || quantidade < 0) quantidade = 0;
+        let minimo = parseInt(minimoInput.value);
+        if (isNaN(minimo) || minimo < 0) minimo = 0;
+        const categoria = categoriaSelect.value;
+
+        // verifica se já existe item com mesmo nome (case insensitive)
+        const indexExistente = estoque.findIndex(item => item.nome.toLowerCase() === nome.toLowerCase());
+
+        if (indexExistente !== -1) {
+            // Atualiza: soma quantidade ao existente, e atualiza o minimo e categoria se desejar (opcional)
+            const itemAntigo = estoque[indexExistente];
+            const novaQuantidade = itemAntigo.quantidade + quantidade;
+            estoque[indexExistente] = {
+                ...itemAntigo,
+                quantidade: novaQuantidade >= 0 ? novaQuantidade : 0,
+                minimo: minimo,   // atualiza mínimo também por consistência
+                categoria: categoria
+            };
+            mostrarMensagem(`🔄 "${nome}" atualizado: nova quantidade = ${novaQuantidade}`, "sucesso");
+        } else {
+            // novo item
+            const novoItem = {
+                id: gerarId(),
+                nome: nome,
+                categoria: categoria,
+                quantidade: quantidade,
+                minimo: minimo
+            };
+            estoque.push(novoItem);
+            mostrarMensagem(`✅ "${nome}" adicionado ao estoque.`, "sucesso");
+        }
+
+        // limpar campos
+        nomeInput.value = "";
+        quantidadeInput.value = "1";
+        minimoInput.value = "5";
+        categoriaSelect.value = "Vestuário";
+        atualizarTabela();
+    }
+
+    // ações de incrementar, decrementar, editar e excluir via event delegation
+    function gerenciarAcoesTabela(e) {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const action = btn.getAttribute("data-action");
+        const id = btn.getAttribute("data-id");
+        if (!id) return;
+
+        const itemIndex = estoque.findIndex(i => i.id === id);
+        if (itemIndex === -1) return;
+
+        if (action === "add") {
+            estoque[itemIndex].quantidade += 1;
+            mostrarMensagem(`➕ +1 unidade em ${estoque[itemIndex].nome}`, "info");
+            atualizarTabela();
+        } 
+        else if (action === "sub") {
+            if (estoque[itemIndex].quantidade > 0) {
+                estoque[itemIndex].quantidade -= 1;
+                mostrarMensagem(`➖ -1 unidade em ${estoque[itemIndex].nome}`, "info");
+            } else {
+                mostrarMensagem(`⚠️ Estoque já está zerado, não é possível reduzir.`, "erro");
+            }
+            atualizarTabela();
+        }
+        else if (action === "edit") {
+            // preencher o formulário para edição completa
+            const item = estoque[itemIndex];
+            document.getElementById("itemNome").value = item.nome;
+            document.getElementById("itemCategoria").value = item.categoria;
+            document.getElementById("itemQuantidade").value = item.quantidade;
+            document.getElementById("itemMinimo").value = item.minimo;
+            // guardar uma flag de edição? mas nosso adicionar/atualizar já trata por nome.
+            // porém se o nome for editado, o comportamento do adicionar irá somar caso exista o novo nome.
+            // Melhor: para edição completa, remover o item antigo e adicionar como novo após confirmação customizada?
+            // Vamos criar um fluxo: botão editar limpa e preenche, e se clicar em adicionar com mesmo nome (mas diferente) ele soma?
+            // Para edição correta: farei um modal de confirmação? Melhor: removemos o item antigo se o nome for alterado?
+            // Implementaremos um modo: quando o usuário clica em editar, armazenamos o id do item em edição, e ao salvar substituímos.
+            // Vamos usar um estado "editModeId"
+            window.editModeId = id;
+            mostrarMensagem(`✏️ Editando "${item.nome}". Altere os dados e clique em "Adicionar / Atualizar" para substituir.`, "info");
+        }
+        else if (action === "delete") {
+            if (confirm(`Tem certeza que deseja excluir "${estoque[itemIndex].nome}" permanentemente?`)) {
+                estoque.splice(itemIndex, 1);
+                mostrarMensagem(`🗑️ Item removido com sucesso.`, "sucesso");
+                atualizarTabela();
+                if (window.editModeId === id) window.editModeId = null;
+            }
+        }
+    }
+
+    // Substituir lógica do botão "Adicionar" com suporte para modo de edição completa
+    function salvarComOuSemEdicao() {
+        if (window.editModeId) {
+            const index = estoque.findIndex(i => i.id === window.editModeId);
+            if (index !== -1) {
+                const nome = document.getElementById("itemNome").value.trim();
+                if (nome === "") {
+                    mostrarMensagem("Nome inválido para edição", "erro");
+                    return;
+                }
+                const categoria = document.getElementById("itemCategoria").value;
+                let quantidade = parseInt(document.getElementById("itemQuantidade").value);
+                if (isNaN(quantidade)) quantidade = 0;
+                let minimo = parseInt(document.getElementById("itemMinimo").value);
+                if (isNaN(minimo)) minimo = 0;
+
+                // Substituir os dados do item, sem duplicação por nome (para evitar conflitos)
+                // Verifica se o novo nome já existe em outro item (diferente do que estamos editando)
+                const conflito = estoque.some((item, idx) => idx !== index && item.nome.toLowerCase() === nome.toLowerCase());
+                if (conflito) {
+                    mostrarMensagem("⚠️ Já existe outro item com este nome. Para mesclar use o fluxo padrão.", "erro");
+                    return;
+                }
+                estoque[index] = { ...estoque[index], nome, categoria, quantidade, minimo };
+                mostrarMensagem(`✏️ Item atualizado com sucesso.`, "sucesso");
+                window.editModeId = null;
+                // limpar formulário
+                document.getElementById("itemNome").value = "";
+                document.getElementById("itemQuantidade").value = "1";
+                document.getElementById("itemMinimo").value = "5";
+                document.getElementById("itemCategoria").value = "Vestuário";
+                atualizarTabela();
+                return;
+            } else {
+                window.editModeId = null;
+            }
+        }
+        // senão, fluxo normal (adicionar ou somar por nome)
+        adicionarOuAtualizarItem();
+    }
+
+    function limparFormulario() {
+        document.getElementById("itemNome").value = "";
+        document.getElementById("itemQuantidade").value = "1";
+        document.getElementById("itemMinimo").value = "5";
+        document.getElementById("itemCategoria").value = "Vestuário";
+        window.editModeId = null;
+        mostrarMensagem("🧹 Campos limpos, modo edição cancelado.", "info");
+    }
+
+    function mostrarMensagem(texto, tipo = "info") {
+        let toast = document.querySelector(".toast-msg");
+        if (toast) toast.remove();
+        const div = document.createElement("div");
+        div.className = "toast-msg";
+        div.innerText = texto;
+        document.body.appendChild(div);
+        setTimeout(() => {
+            if (div) div.style.opacity = "0";
+            setTimeout(() => div.remove(), 300);
+        }, 2600);
+    }
+
+    // configuração inicial e eventos
+    document.addEventListener("DOMContentLoaded", () => {
+        carregarEstoquePersistido();
+        atualizarTabela();
+
+        document.getElementById("btnAdicionar").addEventListener("click", salvarComOuSemEdicao);
+        document.getElementById("btnLimparForm").addEventListener("click", limparFormulario);
+        document.getElementById("estoqueBody").addEventListener("click", gerenciarAcoesTabela);
+    });
+</script>
+</body>
+</html>
